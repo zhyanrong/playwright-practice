@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playwright Test Dashboard - SauceDemo Login Tests</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8fafc;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-card.passed { border-left-color: #48bb78; }
+        .stat-card.failed { border-left-color: #f56565; }
+        .stat-card.duration { border-left-color: #ed8936; }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-number.passed { color: #48bb78; }
+        .stat-number.failed { color: #f56565; }
+        .stat-number.duration { color: #ed8936; }
+        
+        .stat-label {
+            font-size: 0.95em;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+            border-radius: 12px;
+            width: 67%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #2d3748;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .test-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .test-header {
+            padding: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .test-header.passed {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+        
+        .test-header.failed {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+        }
+        
+        .test-body {
+            padding: 20px;
+            background: #f8fafc;
+        }
+        
+        .test-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .meta-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .meta-label {
+            font-size: 0.85em;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+        
+        .meta-value {
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .error-details {
+            background: #fed7d7;
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .error-title {
+            font-weight: bold;
+            color: #c53030;
+            margin-bottom: 10px;
+        }
+        
+        .error-code {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-badge.passed {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .status-badge.failed {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .status-badge.blocked {
+            background: #fbd38d;
+            color: #c05621;
+        }
+        
+        .links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .link-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+        }
+        
+        .link-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .link-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .link-desc {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .footer {
+            background: #edf2f7;
+            padding: 20px 30px;
+            color: #718096;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .test-meta {
+                grid-template-columns: 1fr;
+            }
+            
+            .links {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 Playwright Test Dashboard</h1>
+            <p>SauceDemo Login Automation Tests | Last Updated: March 10, 2026 5:10 PM UTC</p>
+        </div>
+        
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Total Tests</div>
+            </div>
+            <div class="stat-card passed">
+                <div class="stat-number passed">2</div>
+                <div class="stat-label">Passed (67%)</div>
+            </div>
+            <div class="stat-card failed">
+                <div class="stat-number failed">1</div>
+                <div class="stat-label">Failed (33%)</div>
+            </div>
+            <div class="stat-card duration">
+                <div class="stat-number duration">31s</div>
+                <div class="stat-label">Test Duration</div>
+            </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="content">
+            <div class="progress-bar">
+                <div class="progress-fill">67% Tests Passing</div>
+            </div>
+        </div>
+        
+        <!-- Test Results -->
+        <div class="content">
+            <div class="section">
+                <h2>✅ Passed Tests</h2>
+                
+                <div class="test-card">
+                    <div class="test-header passed">
+                        <span>Locked Out User Error</span>
+                        <span>✅ PASSED</span>
+                    </div>
+                    <div class="test-body">
+                        <div class="test-meta">
+                            <div class="meta-item">
+                                <div class="meta-label">File</div>
+                                <div class="meta-value">locked-out-user.spec.ts</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Suite</div>
+                                <div class="meta-value">Login Functionality Suite</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Duration</div>
+                                <div class="meta-value">580ms</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Related Issue</div>
+                                <div class="meta-value">PROP-3 (RESOLVED)</div>
+                            </div>
+                        </div>
+                        <p><strong>Description:</strong> Validates error handling when locked_out_user attempts to login. This test was previously failing due to incorrect error icon selectors but has been fixed.</p>
+                    </div>
+                </div>
+                
+                <div class="test-card">
+                    <div class="test-header passed">
+                        <span>Seed Test</span>
+                        <span>✅ PASSED</span>
+                    </div>
+                    <div class="test-body">
+                        <div class="test-meta">
+                            <div class="meta-item">
+                                <div class="meta-label">File</div>
+                                <div class="meta-value">seed.spec.ts</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Suite</div>
+                                <div class="meta-value">Test group</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Duration</div>
+                                <div class="meta-value">192ms</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Type</div>
+                                <div class="meta-value">Setup/Seed</div>
+                            </div>
+                        </div>
+                        <p><strong>Description:</strong> Basic seed/setup test for test environment preparation.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>❌ Failed Tests</h2>
+                
+                <div class="test-card">
+                    <div class="test-header failed">
+                        <span>Valid Login — Standard User</span>
+                        <span>❌ FAILED</span>
+                    </div>
+                    <div class="test-body">
+                        <div class="test-meta">
+                            <div class="meta-item">
+                                <div class="meta-label">File</div>
+                                <div class="meta-value">valid-login-standard-user.spec.ts</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Suite</div>
+                                <div class="meta-value">Login - TC-LOGIN-001</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Duration</div>
+                                <div class="meta-value">30,026ms (TIMEOUT)</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Related Issue</div>
+                                <div class="meta-value">PROP-2 (User Story)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="error-details">
+                            <div class="error-title">🐛 Root Cause: Selector Typo</div>
+                            <p><strong>Issue:</strong> Typo in data-test attribute selector</p>
+                            <p><strong>Location:</strong> Line 17, Column 20</p>
+                            
+                            <div style="margin: 15px 0;">
+                                <div style="color: #c53030; margin-bottom: 5px;"><strong>❌ Current (incorrect):</strong></div>
+                                <div class="error-code">[data-test="pasword"]</div>
+                            </div>
+                            
+                            <div style="margin: 15px 0;">
+                                <div style="color: #2f855a; margin-bottom: 5px;"><strong>✅ Should be:</strong></div>
+                                <div class="error-code">[data-test="password"]</div>
+                            </div>
+                            
+                            <div style="margin-top: 15px;">
+                                <div style="color: #2d3748; margin-bottom: 5px;"><strong>Full Error:</strong></div>
+                                <div class="error-code">Error: locator.fill: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for locator('[data-test="pasword"]')</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📊 Test Coverage Analysis</h2>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Test Case</th>
+                            <th>Status</th>
+                            <th>Duration</th>
+                            <th>Priority</th>
+                            <th>Epic/Story</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>TC-LOGIN-001: Standard User Login</td>
+                            <td><span class="status-badge failed">FAILED</span></td>
+                            <td>30.0s</td>
+                            <td>High</td>
+                            <td>PROP-2</td>
+                        </tr>
+                        <tr>
+                            <td>TC-LOGIN-003: Locked Out User</td>
+                            <td><span class="status-badge passed">PASSED</span></td>
+                            <td>0.6s</td>
+                            <td>High</td>
+                            <td>PROP-2</td>
+                        </tr>
+                        <tr>
+                            <td>Seed Test</td>
+                            <td><span class="status-badge passed">PASSED</span></td>
+                            <td>0.2s</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div style="margin-top: 20px;">
+                    <h3>Acceptance Criteria Validation:</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>AC-1:</strong> Valid credentials redirect to products page → <span class="status-badge blocked">BLOCKED</span> (test failing)</li>
+                        <li><strong>AC-2:</strong> Invalid credentials show error message → <span class="status-badge passed">VALIDATED</span></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🚨 Action Items</h2>
+                
+                <div style="background: #fed7d7; border: 1px solid #feb2b2; border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                    <h3 style="color: #c53030; margin-bottom: 10px;">🔺 High Priority</h3>
+                    <p><strong>Fix Selector Typo</strong> in valid-login-standard-user.spec.ts</p>
+                    <ul style="margin-left: 20px; margin-top: 8px;">
+                        <li>Change <code>[data-test="pasword"]</code> to <code>[data-test="password"]</code> on line 16</li>
+                        <li><strong>Owner:</strong> Development Team</li>
+                        <li><strong>Sprint:</strong> Sprint 1</li>
+                    </ul>
+                </div>
+                
+                <div style="background: #c6f6d5; border: 1px solid #9ae6b4; border-radius: 8px; padding: 20px;">
+                    <h3 style="color: #2f855a; margin-bottom: 10px;">📊 Sprint 1 Progress</h3>
+                    <ul style="margin-left: 20px;">
+                        <li><strong>Status:</strong> In Progress</li>
+                        <li><strong>Goal:</strong> MVP Smoke Test Coverage for Login</li>
+                        <li><strong>Completion:</strong> 33% (1 of 3 core login tests passing)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🔗 Related Resources</h2>
+                
+                <div class="links">
+                    <a href="https://mercator-ai-team3.atlassian.net/browse/PROP-1" class="link-card">
+                        <div class="link-title">🎯 Epic PROP-1</div>
+                        <div class="link-desc">SauceDemo Login Test Suite</div>
+                    </a>
+                    
+                    <a href="https://mercator-ai-team3.atlassian.net/browse/PROP-2" class="link-card">
+                        <div class="link-title">📋 Story PROP-2</div>
+                        <div class="link-desc">Login Functionality User Story</div>
+                    </a>
+                    
+                    <a href="https://mercator-ai-team3.atlassian.net/browse/PROP-3" class="link-card">
+                        <div class="link-title">🐛 Bug PROP-3</div>
+                        <div class="link-desc">Resolved - Error Icon Selectors</div>
+                    </a>
+                    
+                    <a href="https://mercator-ai-team3.atlassian.net/jira/software/projects/PROP/boards/137" class="link-card">
+                        <div class="link-title">📊 Kanban Board</div>
+                        <div class="link-desc">PROP Project Board</div>
+                    </a>
+                    
+                    <a href="../playwright-report/index.html" class="link-card">
+                        <div class="link-title">📁 HTML Report</div>
+                        <div class="link-desc">Detailed Playwright Report</div>
+                    </a>
+                    
+                    <a href="https://www.saucedemo.com" class="link-card">
+                        <div class="link-title">🌐 Target App</div>
+                        <div class="link-desc">SauceDemo Test Application</div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🔧 Environment Details</h2>
+                
+                <div class="test-meta">
+                    <div class="meta-item">
+                        <div class="meta-label">Framework</div>
+                        <div class="meta-value">Playwright v1.58.2</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Language</div>
+                        <div class="meta-value">TypeScript</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Browser</div>
+                        <div class="meta-value">Chromium</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Workers</div>
+                        <div class="meta-value">3 actual / 5 configured</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Timeout</div>
+                        <div class="meta-value">30,000ms</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Parallel</div>
+                        <div class="meta-value">Enabled</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>Dashboard Owner: Development Team | Stakeholders: QA, Product Owner, Development Team</p>
+            <p>Next Update: After fixing selector typo and re-running tests</p>
+        </div>
+    </div>
+</body>
+</html>

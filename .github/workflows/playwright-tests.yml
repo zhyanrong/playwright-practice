@@ -1,0 +1,378 @@
+name: 🎭 Playwright Test Suite - SauceDemo Login Automation
+
+on:
+  # Schedule: Monday to Friday at 8:00 AM UTC
+  schedule:
+    - cron: '0 8 * * 1-5'
+  
+  # Trigger on push to main branch
+  push:
+    branches: [ main, master ]
+  
+  # Trigger on pull requests to main branch
+  pull_request:
+    branches: [ main, master ]
+  
+  # Manual trigger option
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of test run'
+        required: false
+        default: 'full'
+        type: choice
+        options: 
+          - full
+          - smoke
+          - regression
+      browser:
+        description: 'Browser to test against'
+        required: false
+        default: 'chromium'
+        type: choice
+        options:
+          - chromium
+          - firefox  
+          - webkit
+          - all
+
+env:
+  # Environment variables
+  NODE_VERSION: '18'
+  PLAYWRIGHT_BROWSERS_PATH: '0'
+
+jobs:
+  test:
+    name: 🧪 Run Playwright Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: ${{ github.event.inputs.browser == 'all' && fromJSON('["chromium", "firefox", "webkit"]') || fromJSON(format('["{0}"]', github.event.inputs.browser || 'chromium')) }}
+
+    steps:
+      - name: 📚 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 🔧 Install dependencies
+        run: npm ci
+
+      - name: 🎭 Install Playwright browsers
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: 🧪 Run Playwright tests - ${{ matrix.browser }}
+        run: |
+          if [[ "${{ github.event.inputs.test_type }}" == "smoke" ]]; then
+            npx playwright test --grep "smoke|login" --project=${{ matrix.browser }}
+          elif [[ "${{ github.event.inputs.test_type }}" == "regression" ]]; then
+            npx playwright test --project=${{ matrix.browser }}
+          else
+            npx playwright test --project=${{ matrix.browser }}
+          fi
+        env:
+          CI: true
+
+      - name: 📊 Generate test reports
+        if: always()
+        run: |
+          # Generate JUnit XML report
+          npx playwright test --reporter=junit --output=test-results/junit-${{ matrix.browser }}.xml || true
+          
+          # Generate JSON report  
+          npx playwright test --reporter=json --output=test-results/results-${{ matrix.browser }}.json || true
+          
+          # Copy HTML report
+          if [ -d "playwright-report" ]; then
+            cp -r playwright-report playwright-report-${{ matrix.browser }}
+          fi
+
+      - name: 🎯 Generate Universal Dashboard
+        if: always()
+        run: |
+          # Create timestamp
+          echo "REPORT_TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
+          
+          # Generate consolidated dashboard (using existing file as template)
+          if [ -f "test-analyzer-report.html" ]; then
+            sed -i "s/Generated on: <span id=\"timestamp\"><\/span>/Generated on: ${REPORT_TIMESTAMP}/g" test-analyzer-report.html
+            cp test-analyzer-report.html universal-dashboard-${{ matrix.browser }}.html
+          fi
+
+      - name: 📤 Upload test results - ${{ matrix.browser }}
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.browser }}-${{ github.run_id }}
+          path: |
+            test-results/
+            playwright-report-${{ matrix.browser }}/
+            universal-dashboard-${{ matrix.browser }}.html
+          retention-days: 30
+
+      - name: 📝 Upload Playwright HTML Report - ${{ matrix.browser }}
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.browser }}-${{ github.run_id }}
+          path: playwright-report-${{ matrix.browser }}/
+          retention-days: 30
+
+  consolidate-reports:
+    name: 📊 Consolidate Test Reports  
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+
+    steps:
+      - name: 📚 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📥 Download all test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: 🔄 Consolidate results
+        run: |
+          mkdir -p consolidated-reports
+          
+          # Combine JUnit reports
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > consolidated-reports/junit-combined.xml
+          echo '<testsuites>' >> consolidated-reports/junit-combined.xml
+          
+          for file in artifacts/*/test-results/junit-*.xml; do
+            if [ -f "$file" ]; then
+              tail -n +3 "$file" | head -n -1 >> consolidated-reports/junit-combined.xml
+            fi
+          done
+          
+          echo '</testsuites>' >> consolidated-reports/junit-combined.xml
+          
+          # Copy individual browser reports
+          find artifacts/ -name "universal-dashboard-*.html" -exec cp {} consolidated-reports/ \;
+          find artifacts/ -name "playwright-report-*" -type d -exec cp -r {} consolidated-reports/ \;
+
+      - name: 🎯 Generate Final Dashboard
+        run: |
+          # Create comprehensive dashboard with all browser results
+          TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S UTC')
+          BROWSER_COUNT=$(find artifacts/ -name "test-results-*" -type d | wc -l)
+          
+          cat > consolidated-reports/ci-dashboard.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>🚀 CI/CD Test Dashboard - Multi-Browser Results</title>
+              <style>
+                  body { 
+                      font-family: 'Segoe UI', sans-serif; 
+                      margin: 0; padding: 20px; 
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      min-height: 100vh;
+                  }
+                  .container { 
+                      max-width: 1200px; margin: 0 auto; 
+                      background: rgba(255,255,255,0.95);
+                      border-radius: 15px; padding: 30px;
+                      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+                  }
+                  .header { 
+                      text-align: center; margin-bottom: 30px; 
+                      padding-bottom: 20px; border-bottom: 2px solid #667eea;
+                  }
+                  .header h1 { 
+                      color: #333; font-size: 2.5em; margin-bottom: 10px;
+                      background: linear-gradient(135deg, #667eea, #764ba2);
+                      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                  }
+                  .metrics { 
+                      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+                      gap: 20px; margin: 30px 0; 
+                  }
+                  .metric-card { 
+                      background: linear-gradient(135deg, #74b9ff, #0984e3); 
+                      color: white; padding: 20px; border-radius: 10px; text-align: center; 
+                  }
+                  .metric-value { font-size: 2em; font-weight: bold; }
+                  .browser-results { 
+                      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+                      gap: 20px; margin: 30px 0; 
+                  }
+                  .browser-card { 
+                      border: 1px solid #ddd; border-radius: 10px; padding: 20px; 
+                      background: #f8f9fa; 
+                  }
+                  .status-pass { color: #00b894; font-weight: bold; }
+                  .status-fail { color: #e17055; font-weight: bold; }
+                  .footer { 
+                      text-align: center; margin-top: 40px; padding: 20px; 
+                      border-top: 1px solid #ddd; color: #666; 
+                  }
+                  .ci-badge { 
+                      display: inline-block; padding: 5px 15px; 
+                      background: #00b894; color: white; 
+                      border-radius: 15px; font-size: 0.9em; margin: 5px; 
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <div class="header">
+                      <h1>🚀 CI/CD Test Dashboard</h1>
+                      <p><strong>SauceDemo Login Automation - Multi-Browser Test Results</strong></p>
+                      <div class="ci-badge">✅ GitHub Actions</div>
+                      <div class="ci-badge">🎭 Playwright</div>
+                      <div class="ci-badge">⏰ Scheduled Daily</div>
+                      <p><small>Run #${{ github.run_number}} - Generated: TIMESTAMP_PLACEHOLDER</small></p>
+                  </div>
+                  
+                  <div class="metrics">
+                      <div class="metric-card">
+                          <div class="metric-value">BROWSER_COUNT_PLACEHOLDER</div>
+                          <div>Browsers Tested</div>
+                      </div>
+                      <div class="metric-card">
+                          <div class="metric-value">${{ github.run_number}}</div>
+                          <div>Build Number</div>
+                      </div>
+                      <div class="metric-card">
+                          <div class="metric-value">${{ github.ref_name }}</div>
+                          <div>Branch</div>
+                      </div>
+                      <div class="metric-card">
+                          <div class="metric-value">${{ github.actor }}</div>
+                          <div>Triggered By</div>
+                      </div>
+                  </div>
+                  
+                  <div class="browser-results">
+          EOF
+          
+          # Replace placeholders
+          sed -i "s/TIMESTAMP_PLACEHOLDER/$TIMESTAMP/g" consolidated-reports/ci-dashboard.html
+          sed -i "s/BROWSER_COUNT_PLACEHOLDER/$BROWSER_COUNT/g" consolidated-reports/ci-dashboard.html
+          
+          # Add browser-specific results (simplified for now)
+          for browser in chromium firefox webkit; do
+            if find artifacts/ -name "*$browser*" | grep -q .; then
+              cat >> consolidated-reports/ci-dashboard.html << EOF
+                      <div class="browser-card">
+                          <h3>🌐 ${browser^} Results</h3>
+                          <p><span class="status-pass">✅ Tests Completed</span></p>
+                          <p>Reports available in artifacts</p>
+                      </div>
+          EOF
+            fi
+          done
+          
+          cat >> consolidated-reports/ci-dashboard.html << 'EOF'
+                  </div>
+                  
+                  <div class="footer">
+                      <p><strong>CI/CD Pipeline Dashboard</strong> - Automatically generated by GitHub Actions</p>
+                      <p>Framework: Playwright v1.58.2 | Project: PROP-2 SauceDemo Login Tests</p>
+                      <p>📊 View detailed reports in the artifacts section</p>
+                  </div>
+              </div>
+          </body>
+          </html>
+          EOF
+
+      - name: 📤 Upload consolidated reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: consolidated-test-reports-${{ github.run_id }}
+          path: consolidated-reports/
+          retention-days: 30
+
+  notify:
+    name: 📢 Notify Results
+    runs-on: ubuntu-latest
+    needs: [test, consolidate-reports]
+    if: always()
+
+    steps:
+      - name: 📊 Calculate test results
+        id: results
+        run: |
+          if [[ "${{ needs.test.result }}" == "success" ]]; then
+            echo "status=✅ PASSED" >> $GITHUB_OUTPUT
+            echo "color=good" >> $GITHUB_OUTPUT
+          else
+            echo "status=❌ FAILED" >> $GITHUB_OUTPUT  
+            echo "color=danger" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "run_url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
+
+      - name: 💬 Create Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          # 🎭 Playwright Test Results Summary
+          
+          ## 📊 Test Execution Details
+          - **Status**: ${{ steps.results.outputs.status }}
+          - **Branch**: `${{ github.ref_name }}`
+          - **Commit**: `${{ github.sha }}`
+          - **Triggered by**: ${{ github.actor }}
+          - **Run ID**: #${{ github.run_number }}
+          
+          ## 🌐 Browser Coverage
+          - Browsers tested based on configuration
+          - All reports available in artifacts
+          
+          ## 📁 Available Artifacts
+          1. **Individual Browser Reports** - Detailed results per browser
+          2. **Consolidated Dashboard** - Combined multi-browser view  
+          3. **JUnit XML** - CI/CD integration format
+          4. **Playwright HTML Reports** - Interactive debugging reports
+          
+          ## 🔗 Quick Links
+          - [View Run Details](${{ steps.results.outputs.run_url }})
+          - [Download Artifacts](${{ steps.results.outputs.run_url }}#artifacts)
+          
+          ---
+          *🤖 Automated by GitHub Actions | 🎯 SauceDemo Login Test Suite*
+          EOF
+
+      # Uncomment and configure if you want Slack notifications
+      # - name: 📱 Slack Notification
+      #   if: always()
+      #   uses: 8398a7/action-slack@v3
+      #   with:
+      #     status: ${{ job.status }}
+      #     channel: '#testing'
+      #     text: |
+      #       🎭 Playwright Tests: ${{ steps.results.outputs.status }}
+      #       Branch: ${{ github.ref_name }}
+      #       Run: #${{ github.run_number }}
+      #       View: ${{ steps.results.outputs.run_url }}
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      # Uncomment and configure if you want email notifications  
+      # - name: 📧 Email Notification
+      #   if: failure()
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: smtp.gmail.com
+      #     server_port: 587
+      #     username: ${{ secrets.EMAIL_USERNAME }}
+      #     password: ${{ secrets.EMAIL_PASSWORD }}
+      #     subject: "🚨 Playwright Tests Failed - Build #${{ github.run_number }}"
+      #     body: |
+      #       Test execution failed on branch ${{ github.ref_name }}
+      #       
+      #       View details: ${{ steps.results.outputs.run_url }}
+      #       
+      #       Please check the logs and artifacts for more information.
+      #     to: your-team@company.com
+      #     from: github-actions@company.com

@@ -1,0 +1,41 @@
+<testsuites id="" name="" tests="3" failures="1" skipped="0" errors="0" time="31.025229000000003">
+<testsuite name="login/locked-out-user.spec.ts" timestamp="2026-03-10T17:10:11.544Z" hostname="" tests="1" failures="0" skipped="0" time="0.58" errors="0">
+<testcase name="Login Functionality Suite › Locked Out User Error" classname="login/locked-out-user.spec.ts" time="0.58">
+</testcase>
+</testsuite>
+<testsuite name="login/valid-login-standard-user.spec.ts" timestamp="2026-03-10T17:10:11.544Z" hostname="" tests="1" failures="1" skipped="0" time="30.026" errors="0">
+<testcase name="Login - TC-LOGIN-001 › Valid login — standard_user" classname="login/valid-login-standard-user.spec.ts" time="30.026">
+<failure message="valid-login-standard-user.spec.ts:7:7 Valid login — standard_user" type="FAILURE">
+<![CDATA[  login/valid-login-standard-user.spec.ts:7:7 › Login - TC-LOGIN-001 › Valid login — standard_user ─
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-test="pasword"]')
+
+
+      15 |     // Enter password `secret_sauce` into password field.
+      16 |     const password = page.locator('[data-test="pasword"]');
+    > 17 |     await password.fill('secret_sauce');
+         |                    ^
+      18 |
+      19 |     // Click the Login button.
+      20 |     const loginBtn = page.locator('[data-test="login-button"]');
+        at /Users/yanrong.zhang/playwright/playwright-practice/tests/login/valid-login-standard-user.spec.ts:17:20
+
+    Error Context: ../test-results/login-valid-login-standard-5f00f-Valid-login-—-standard-user/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|login-valid-login-standard-5f00f-Valid-login-—-standard-user/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="seed.spec.ts" timestamp="2026-03-10T17:10:11.544Z" hostname="" tests="1" failures="0" skipped="0" time="0.192" errors="0">
+<testcase name="Test group › seed" classname="seed.spec.ts" time="0.192">
+</testcase>
+</testsuite>
+</testsuites>
