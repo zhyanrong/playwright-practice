@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
@@ -10,4 +10,7 @@ export default defineConfig({
     ["junit", { outputFile: 'test-results/junit.xml' }],
     ["json", { outputFile: 'test-results/results.json' }]
   ],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } }
+  ]
 });
