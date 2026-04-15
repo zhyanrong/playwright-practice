@@ -13,7 +13,7 @@ test.describe('Login - TC-LOGIN-001', () => {
     await username.fill('standard_user');
 
     // Enter password `secret_sauce` into password field.
-    const password = page.locator('[data-test="pasword"]');
+    const password = page.locator('[data-test="password"]');
     await password.fill('secret_sauce');
 
     // Click the Login button.

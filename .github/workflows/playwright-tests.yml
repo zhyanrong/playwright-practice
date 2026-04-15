@@ -2,8 +2,8 @@ name: 🎭 Playwright Test Suite - SauceDemo Login Automation
 
 on:
   # Schedule: Monday to Friday at 8:00 AM UTC
-  # schedule:
-  #   - cron: '0 8 * * 1-5'
+  schedule:
+    - cron: '0 8 * * 1-5'
   
   # Trigger on push to main branch
   push:
