@@ -1,41 +1,199 @@
-<testsuites id="" name="" tests="3" failures="1" skipped="0" errors="0" time="31.025229000000003">
-<testsuite name="login/locked-out-user.spec.ts" timestamp="2026-03-10T17:10:11.544Z" hostname="" tests="1" failures="0" skipped="0" time="0.58" errors="0">
-<testcase name="Login Functionality Suite › Locked Out User Error" classname="login/locked-out-user.spec.ts" time="0.58">
-</testcase>
-</testsuite>
-<testsuite name="login/valid-login-standard-user.spec.ts" timestamp="2026-03-10T17:10:11.544Z" hostname="" tests="1" failures="1" skipped="0" time="30.026" errors="0">
-<testcase name="Login - TC-LOGIN-001 › Valid login — standard_user" classname="login/valid-login-standard-user.spec.ts" time="30.026">
-<failure message="valid-login-standard-user.spec.ts:7:7 Valid login — standard_user" type="FAILURE">
-<![CDATA[  login/valid-login-standard-user.spec.ts:7:7 › Login - TC-LOGIN-001 › Valid login — standard_user ─
-
-    Test timeout of 30000ms exceeded.
-
-    Error: locator.fill: Test timeout of 30000ms exceeded.
-    Call log:
-      - waiting for locator('[data-test="pasword"]')
-
-
-      15 |     // Enter password `secret_sauce` into password field.
-      16 |     const password = page.locator('[data-test="pasword"]');
-    > 17 |     await password.fill('secret_sauce');
-         |                    ^
-      18 |
-      19 |     // Click the Login button.
-      20 |     const loginBtn = page.locator('[data-test="login-button"]');
-        at /Users/yanrong.zhang/playwright/playwright-practice/tests/login/valid-login-standard-user.spec.ts:17:20
-
-    Error Context: ../test-results/login-valid-login-standard-5f00f-Valid-login-—-standard-user/error-context.md
-]]>
-</failure>
+<testsuites id="" name="" tests="13" failures="0" skipped="0" errors="0" time="9.734325">
+<testsuite name="accessibility/saucedemo-accessibility.spec.ts" timestamp="2026-04-15T16:28:13.898Z" hostname="chromium" tests="3" failures="0" skipped="0" time="4.576" errors="0">
+<testcase name="SauceDemo Login Page - Accessibility Audit › Complete accessibility scan for login page" classname="accessibility/saucedemo-accessibility.spec.ts" time="1.855">
 <system-out>
-<![CDATA[
-[[ATTACHMENT|login-valid-login-standard-5f00f-Valid-login-—-standard-user/error-context.md]]
+<![CDATA[📊 Accessibility Report Generated:
+📄 JSON Report: /Users/yanrong.zhang/playwright/playwright-practice/accessibility-reports/saucedemo-login-accessibility-2026-04-15T16-28-16-861Z.json
+🌐 HTML Report: /Users/yanrong.zhang/playwright/playwright-practice/accessibility-reports/saucedemo-login-accessibility-2026-04-15T16-28-16-861Z.html
+📈 Summary: 3 violations, 15 passes
+
+🚨 ACCESSIBILITY VIOLATIONS FOUND:
+
+1. landmark-one-main (moderate)
+   Description: Ensure the document has a main landmark
+   Help: Document should have one main landmark
+   Elements affected: 1
+     1. html
+        Issue: Fix all of the following:
+  Document does not have a main landmark
+
+2. page-has-heading-one (moderate)
+   Description: Ensure that the page, or at least one of its frames contains a level-one heading
+   Help: Page should contain a level-one heading
+   Elements affected: 1
+     1. html
+        Issue: Fix all of the following:
+  Page must have a level-one heading
+
+3. region (moderate)
+   Description: Ensure all page content is contained by landmarks
+   Help: All page content should be contained by landmarks
+   Elements affected: 4
+     1. .login_logo
+        Issue: Fix any of the following:
+  Some page content is not contained by landmarks
+     2. .form_group:nth-child(1)
+        Issue: Fix any of the following:
+  Some page content is not contained by landmarks
+     3. .form_group:nth-child(2)
+        Issue: Fix any of the following:
+  Some page content is not contained by landmarks
+     4. .login_credentials_wrap
+        Issue: Fix any of the following:
+  Some page content is not contained by landmarks
+]]>
+</system-out>
+</testcase>
+<testcase name="SauceDemo Login Page - Accessibility Audit › Keyboard navigation accessibility" classname="accessibility/saucedemo-accessibility.spec.ts" time="1.431">
+<system-out>
+<![CDATA[✅ Keyboard navigation working correctly
+]]>
+</system-out>
+</testcase>
+<testcase name="SauceDemo Login Page - Accessibility Audit › Screen reader compatibility" classname="accessibility/saucedemo-accessibility.spec.ts" time="1.29">
+<system-out>
+<![CDATA[Username field accessible name: Username
+Password field accessible name: Password
+Login button accessible name: Login
 ]]>
 </system-out>
 </testcase>
 </testsuite>
-<testsuite name="seed.spec.ts" timestamp="2026-03-10T17:10:11.544Z" hostname="" tests="1" failures="0" skipped="0" time="0.192" errors="0">
-<testcase name="Test group › seed" classname="seed.spec.ts" time="0.192">
+<testsuite name="login/locked-out-user.spec.ts" timestamp="2026-04-15T16:28:13.898Z" hostname="chromium" tests="1" failures="0" skipped="0" time="0.688" errors="0">
+<testcase name="Login Functionality Suite › Locked Out User Error" classname="login/locked-out-user.spec.ts" time="0.688">
+</testcase>
+</testsuite>
+<testsuite name="login/valid-login-standard-user.spec.ts" timestamp="2026-04-15T16:28:13.898Z" hostname="chromium" tests="1" failures="0" skipped="0" time="0.679" errors="0">
+<testcase name="Login - TC-LOGIN-001 › Valid login — standard_user" classname="login/valid-login-standard-user.spec.ts" time="0.679">
+</testcase>
+</testsuite>
+<testsuite name="performance/saucedemo-performance.spec.ts" timestamp="2026-04-15T16:28:13.898Z" hostname="chromium" tests="4" failures="0" skipped="0" time="8.512" errors="0">
+<testcase name="SauceDemo Login Page - Performance Testing › Core Web Vitals and Page Load Performance" classname="performance/saucedemo-performance.spec.ts" time="4.637">
+<system-out>
+<![CDATA[
+📊 Performance Report Generated:
+📄 JSON Report: /Users/yanrong.zhang/playwright/playwright-practice/performance-reports/saucedemo-performance-2026-04-15T16-28-19-599Z.json
+🌐 HTML Report: /Users/yanrong.zhang/playwright/playwright-practice/performance-reports/saucedemo-performance-2026-04-15T16-28-19-599Z.html
+📈 Overall Performance Score: 99/100
+
+📊 PERFORMANCE METRICS:
+⏱️  Total Navigation Time: 1305ms
+🏗️  DOM Content Loaded: 0.09999996423721313ms
+✅ Load Complete: 0.800000011920929ms
+🎨 First Contentful Paint: N/Ams
+🖼️  Largest Contentful Paint: N/Ams
+📦 Total Resources: 5
+📏 Total Size: 228.43 KB
+]]>
+</system-out>
+</testcase>
+<testcase name="SauceDemo Login Page - Performance Testing › Login Form Interaction Performance" classname="performance/saucedemo-performance.spec.ts" time="1.348">
+<system-out>
+<![CDATA[
+⚡ INTERACTION PERFORMANCE:
+⌨️  Username input delay: 37ms
+🔒 Password input delay: 18ms
+🚀 Form submission time: 46ms
+✅ Login performance test completed successfully
+]]>
+</system-out>
+</testcase>
+<testcase name="SauceDemo Login Page - Performance Testing › Network Performance Analysis" classname="performance/saucedemo-performance.spec.ts" time="1.254">
+<system-out>
+<![CDATA[
+🌐 NETWORK PERFORMANCE:
+📡 Total requests: 9
+❌ Failed requests: 0
+⏱️  Network idle achieved in: 1214ms
+📊 Request breakdown:
+   document: 1
+   stylesheet: 2
+   script: 1
+   fetch: 2
+   font: 3
+]]>
+</system-out>
+</testcase>
+<testcase name="SauceDemo Login Page - Performance Testing › Memory and Resource Usage" classname="performance/saucedemo-performance.spec.ts" time="1.273">
+<system-out>
+<![CDATA[
+💾 MEMORY USAGE:
+🧠 Used heap: 3.50 MB
+📊 Total heap: 5.75 MB
+📈 Heap limit: Not Available
+
+⚡ RUNTIME METRICS:
+🕰️  Documents: 3
+🖼️  Frames: 1
+📝 Nodes: 78
+👂 Event listeners: 157
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="quality/saucedemo-quality-suite.spec.ts" timestamp="2026-04-15T16:28:13.898Z" hostname="chromium" tests="3" failures="0" skipped="0" time="4.273" errors="0">
+<testcase name="SauceDemo - Comprehensive Quality Assurance Suite › Complete Quality Assessment - Performance + Accessibility" classname="quality/saucedemo-quality-suite.spec.ts" time="1.664">
+<system-out>
+<![CDATA[
+🎯 COMPREHENSIVE QUALITY ASSESSMENT
+=====================================
+
+⚡ PERFORMANCE SNAPSHOT:
+   📊 Navigation Time: 1306ms
+   🚀 Grade: EXCELLENT (A+)
+
+♿ ACCESSIBILITY SNAPSHOT:
+   ⌨️ Keyboard Navigation: ✅ Working
+   🏷️ Form Labels: ✅ Username, ✅ Password
+   🔘 Button Label: ✅ Login
+
+🧪 FUNCTIONAL VALIDATION:
+   🚀 Login Flow: ✅ Successful
+   ⚡ Interaction Time: 59ms
+   📊 Performance: EXCELLENT
+
+🏆 OVERALL QUALITY ASSESSMENT:
+   📊 Quality Score: 100/100
+   🎯 Overall Grade: A+
+   📈 Status: ✅ PRODUCTION READY
+
+💡 QUALITY RECOMMENDATIONS:
+   🌟 Performance is excellent - maintain current standards
+   ♿ Accessibility basics are in place
+   📊 Run full performance suite: npm run test:perf
+   🔍 Run full accessibility audit: npm run test:a11y
+
+✅ Comprehensive quality assessment completed successfully!
+]]>
+</system-out>
+</testcase>
+<testcase name="SauceDemo - Comprehensive Quality Assurance Suite › Quality Gates - Performance Thresholds" classname="quality/saucedemo-quality-suite.spec.ts" time="1.337">
+<system-out>
+<![CDATA[
+🚧 QUALITY GATES - Performance Thresholds
+   ⏱️ Load Time: 1224ms
+   ✅ Quality Gate 1: Page Load < 5s (1224ms)
+   ✅ Quality Gate 2: Fast Load < 3s (1224ms)
+   ⚡ Form Interaction: 79ms
+   ✅ Quality Gate 3: Form Response < 3s (79ms)
+   🏆 All Quality Gates: PASSED
+]]>
+</system-out>
+</testcase>
+<testcase name="SauceDemo - Comprehensive Quality Assurance Suite › Quality Gates - Accessibility Standards" classname="quality/saucedemo-quality-suite.spec.ts" time="1.272">
+<system-out>
+<![CDATA[
+🚧 QUALITY GATES - Accessibility Standards
+   ✅ Accessibility Gate 1: Keyboard Navigation Working
+   ✅ Accessibility Gate 2: Form Elements Have Accessible Names
+   ✅ Accessibility Gate 3: Full Keyboard Navigation
+   🏆 All Accessibility Gates: PASSED
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="seed.spec.ts" timestamp="2026-04-15T16:28:13.898Z" hostname="chromium" tests="1" failures="0" skipped="0" time="0.026" errors="0">
+<testcase name="Test group › seed" classname="seed.spec.ts" time="0.026">
 </testcase>
 </testsuite>
 </testsuites>

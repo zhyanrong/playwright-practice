@@ -102,9 +102,11 @@ jobs:
           # Create timestamp
           echo "REPORT_TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
           
-          # Generate consolidated dashboard (using existing file as template)
+          # Generate consolidated dashboard using the script
+          node generate-universal-dashboard.js || echo "Dashboard generation failed, but continuing..."
+          
+          # Copy HTML report for browser-specific artifacts
           if [ -f "test-analyzer-report.html" ]; then
-            sed -i "s/Generated on: <span id=\"timestamp\"><\/span>/Generated on: ${REPORT_TIMESTAMP}/g" test-analyzer-report.html
             cp test-analyzer-report.html universal-dashboard-${{ matrix.browser }}.html
           fi
 
