@@ -1,2 +1,11 @@
 node_modules
 _*.md
+accessibility-reports/
+generate-universal-dashboard.js
+performance-reports/
+scripts/
+test-analyzer-report copy.html
+test-results-report.html
+tests/accessibility/
+tests/performance/
+tests/quality/
